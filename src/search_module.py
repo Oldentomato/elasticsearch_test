@@ -13,6 +13,7 @@ class Embedding_Search():
         
 
         max_seq_len, doc_stride = 384, 128
+        #reader: 검색된 context와 질문을 이용하여 질문에 따른 답변을 생성해주는 역할
         reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", max_seq_len=max_seq_len,
                             doc_stride=doc_stride, return_no_answer=True)
 

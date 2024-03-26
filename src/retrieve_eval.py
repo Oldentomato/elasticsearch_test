@@ -1,7 +1,8 @@
-from haystack.pipeline import Pipeline
+from haystack.pipelines import Pipeline
 from haystack.eval import EvalDocuments
 from haystack import Label
 
+#여기 코드는 너무 오래된 것으로 판단됨(haystack.eval이라는 모듈이 인식이 안됨)
 #각 retrive방식(임베딩이나 bm25 등)에 따른 성능평가를 위한 코드
 class EvalRetrieverPipeline:
     def __init__(self, retriever):
@@ -64,6 +65,9 @@ def run_pipeline(pipeline, labels_agg, top_k_retriever=10, top_k_reader=4):
     for l in labels_agg:
         _ = pipeline.pipeline.run(
             query=l.question,
-            
+            top_k_retriever= top_k_retriever,
+            top_k_reader = top_k_reader,
+            top_k_eval_documents=top_k_retriever,
+            labels=l
         )
 
