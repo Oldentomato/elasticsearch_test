@@ -10,9 +10,9 @@ class EvalRetrieverPipeline:
         self.eval_retriever = EvalDocuments()
         pipe = Pipeline()
         pipe.add_node(component=self.retriever, name="ESRetriever",
-                      inputs=["Query"])
+                    inputs=["Query"])
         pipe.add_node(component=self.eval_retriever, name="EvalRetriever",
-                      inputs=["ESRetriever"])
+                    inputs=["ESRetriever"])
         
         self.pipeline = pipe
 
