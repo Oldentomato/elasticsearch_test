@@ -6,12 +6,9 @@ from data_store import dataset_store, delete_data, pdfdata_store
 from search_module import Embedding_Search
 # from retrieve_eval import *
 
-
 #https://github.com/rickiepark/nlp-with-transformers/blob/main/07_question-answering.ipynb
 
-
 if __name__ == "__main__":
-
 
     n_answers = 3
 
@@ -24,9 +21,10 @@ if __name__ == "__main__":
 
     # delete_data(document_store, "f31159ad469fea3d5249d5ca7dae7177")
 
-    search = Embedding_Search(document_store, n_answers, "bm25")
+    search = Embedding_Search(document_store, n_answers, search_mode="Ensemble")
 
-    preds = search.run("Is it good for reading?") # 교통신호기 관리대장의 작성 요령은?Is it good for reading?
+    preds = search.run("Is it good for reading?") 
+
 
     print(f"질문: {preds['query']} \n")
     for idx in range(n_answers):
@@ -35,11 +33,4 @@ if __name__ == "__main__":
         print("\n\n")
 
 
-    #deprecated
-    # retriever = BM25Retriever(document_store=document_store)
-    # pipe = EvalRetrieverPipeline()
-    # labels = set_evaldataset(dfs)
-    # eval_datastore(document_store,labels)
 
-    # run_pipeline(pipe, top_k_retriever=3)
-    # print(f"재현율@3 {pipe.eval_retriever.recall: .2f}")

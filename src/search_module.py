@@ -1,14 +1,13 @@
 from haystack.nodes import EmbeddingRetriever, FARMReader, BM25Retriever
-from haystack.pipelines import ExtractiveQAPipeline
+from haystack.pipelines import ExtractiveQAPipeline, DocumentSearchPipeline
+from custom_pipeline import Ensemble_Pipeline, Decision_Pipeline
 
 class Embedding_Search():
-    def __init__(self, store, n_answers, retrieve_mode="bm25"):
+    def __init__(self, store, n_answers, retrieve_mode="bm25", search_mode="extract"):
         self.n_answers = n_answers
-        if retrieve_mode == "bm25":
-            retriever = BM25Retriever(document_store=store)
-        elif retrieve_mode == "embedding":
-            #EmbeddingRetriever로 하면 저장된 데이터들을 기반으로 임베딩모델을 업데이트시켜야함(여기가 오래걸림)
-            retriever = EmbeddingRetriever(document_store=store, embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
+        self.search_mode = search_mode
+        bm_retriever = BM25Retriever(document_store=store)
+        embed_retriever = EmbeddingRetriever(document_store=store, embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
 
         
 
@@ -17,9 +16,20 @@ class Embedding_Search():
         reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", max_seq_len=max_seq_len,
                             doc_stride=doc_stride, return_no_answer=True)
 
-        self.pipe = ExtractiveQAPipeline(reader, retriever)
+        if search_mode == "extract":
+            self.pipe = ExtractiveQAPipeline(reader, bm_retriever if retrieve_mode == "bm25" else embed_retriever)
+        elif search_mode == "search":
+            self.pipe = DocumentSearchPipeline(bm_retriever if retrieve_mode == "bm25" else embed_retriever)
+        elif search_mode == "Ensemble":
+            self.pipe = Ensemble_Pipeline(bm_retriever, embed_retriever, reader)
+        elif search_mode == "Decision":
+            self.pipe = Decision_Pipeline(bm_retriever, embed_retriever, reader)
 
     def run(self, query):
-        preds = self.pipe.run(query=query, params={"Retriever": {"top_k": 3}, "Reader": {"top_k": self.n_answers}})
+        if self.search_mode == "Ensemble" or self.search_mode == "Decision":
+            params = {"EmbeddingRetriever": {"top_k": 5}, "BM25Retriever": {"top_k": 5}}
+        else:
+            params = {"Retriever": {"top_k": 3}, "Reader": {"top_k": self.n_answers}}
+        preds = self.pipe.run(query=query, params=params)
 
         return preds

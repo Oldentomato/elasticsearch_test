@@ -11,6 +11,7 @@ def dataset_store(store, index_name, dfs, is_embedding=False):
 
     if is_embedding:
         retriever = EmbeddingRetriever(document_store=store, embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1")
+        #EmbeddingRetriever로 하면 저장된 데이터들을 기반으로 임베딩모델을 업데이트시켜야함(여기가 오래걸림)
         store.update_embeddings(retriever)
 
     print(f"{store.get_document_count()}개 문서가 저장되었습니다.")
